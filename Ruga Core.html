@@ -1,0 +1,373 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ruga Core</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,900&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: brand hero band, sticky category nav, two-column card grids per system group, spec table at the end. */
+:root {
+  color-scheme: dark;
+  --bg: #0c0607;
+  --bg-2: #140a0b;
+  --panel: #1a0f10;
+  --line: #3a2224;
+  --fg: #f3eeee;
+  --mute: #b39c9e;
+  --red: #e50004;
+  --red-l: #ff3b3e;
+  --red-soft: rgba(229, 0, 4, .16);
+  --ok: #4fd13a;
+  --f-display: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --f-body: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono', Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+a { color: var(--red-l); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+:focus-visible { outline: 2px solid var(--red-l); outline-offset: 2px; }
+
+/* Hero */
+.hero { position: relative; overflow: hidden; margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 56px); padding-bottom: 56px;
+  background:
+    radial-gradient(60% 80% at 8% 10%, rgba(229,0,4,.38) 0%, rgba(229,0,4,0) 70%),
+    radial-gradient(50% 60% at 95% 100%, rgba(229,0,4,.18) 0%, rgba(229,0,4,0) 70%),
+    linear-gradient(180deg, #1c0708 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--line); }
+.hero-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { font-family: var(--f-display); font-weight: 900; font-style: italic; font-size: 22px; letter-spacing: -.3px; }
+.brand span { color: var(--red); }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: rgba(0,0,0,.3); }
+.lang button { appearance: none; border: 0; background: transparent; color: var(--mute); font: 700 12.5px var(--f-body); padding: 6px 14px; border-radius: 999px; cursor: pointer; letter-spacing: .4px; }
+.lang button[aria-pressed="true"] { background: var(--fg); color: #140a0b; }
+.hero h1 { margin: 40px 0 0; font-family: var(--f-display); font-weight: 900; font-style: italic; font-size: clamp(40px, 7vw, 76px); line-height: .95; letter-spacing: -2px; text-wrap: balance; }
+.hero h1 em { color: var(--red); font-style: italic; }
+.hero .lead { margin: 18px 0 0; max-width: 64ch; font-size: 18px; color: #e1d5d6; }
+.tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 3px; background: var(--red); font-size: 11.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; box-shadow: 0 0 16px rgba(229,0,4,.45); }
+.stats { margin-top: 34px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 14px 16px; border: 1px solid var(--line); border-radius: 4px; background: rgba(0,0,0,.28); }
+.stat b { display: block; font-family: var(--f-display); font-weight: 900; font-style: italic; font-size: 30px; color: var(--red-l); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { font-size: 12.5px; color: var(--mute); }
+
+/* Nav */
+nav.cats { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(12,6,7,.94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+nav.cats .wrap { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+nav.cats a { flex: none; text-decoration: none; color: var(--mute); font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 3px; border: 1px solid transparent; }
+nav.cats a:hover { color: var(--fg); border-color: var(--line); }
+
+/* Sections */
+main { padding-block: 24px 56px; }
+section.group { padding-top: 40px; scroll-margin-top: 70px; }
+.ghead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.ghead h2 { margin: 0; font-family: var(--f-display); font-weight: 900; font-style: italic; font-size: 30px; letter-spacing: -.5px; text-wrap: balance; }
+.ghead h2::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--red-l); box-shadow: 0 0 8px rgba(229,0,4,.8); margin-right: 12px; vertical-align: 6px; }
+.ghead p { margin: 0; color: var(--mute); max-width: 70ch; }
+.grid { margin-top: 18px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.card { min-width: 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); }
+.card h3 { margin: 0; font-size: 16px; font-weight: 800; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.card h3 code { font-family: var(--f-mono); font-size: 11.5px; font-weight: 500; color: var(--mute); background: rgba(255,255,255,.04); padding: 1px 6px; border-radius: 3px; }
+.card p { margin: 8px 0 0; color: #dccfd0; font-size: 14px; }
+.card ul { margin: 8px 0 0; padding-left: 18px; color: #dccfd0; font-size: 14px; }
+.card li + li { margin-top: 3px; }
+.card.feature { grid-column: 1 / -1; border-color: rgba(229,0,4,.45); background: linear-gradient(135deg, rgba(229,0,4,.10), rgba(229,0,4,0) 55%), var(--panel); }
+.chips { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; color: var(--mute); border: 1px solid var(--line); border-radius: 3px; padding: 1px 7px; }
+
+/* Specs */
+.specs { margin-top: 18px; overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 11.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--mute); background: var(--bg-2); }
+tr:last-child td { border-bottom: 0; }
+td code { font-family: var(--f-mono); font-size: 12.5px; }
+.req { color: var(--red-l); font-weight: 700; }
+.opt { color: var(--mute); font-weight: 700; }
+.notes { margin-top: 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+footer { border-top: 1px solid var(--line); padding-block: 26px; color: var(--mute); font-size: 13px; }
+
+@media (max-width: 860px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid, .notes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card { transition: border-color .15s; }
+  .card:hover { border-color: rgba(229,0,4,.45); }
+}
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">RUGA <span>CORE</span></div>
+      <div class="lang" role="group" aria-label="Sprache / Language">
+        <button type="button" id="btn-de" data-lang="de" aria-pressed="true">DE</button>
+        <button type="button" id="btn-en" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <span class="tag" style="margin-top:34px" data-i18n="tag"></span>
+    <h1 data-i18n-html="h1"></h1>
+    <p class="lead" data-i18n="lead"></p>
+    <div class="stats">
+      <div class="stat"><b id="n-res">0</b><span data-i18n="s1"></span></div>
+      <div class="stat"><b>1</b><span data-i18n="s2"></span></div>
+      <div class="stat"><b>ESX</b><span data-i18n="s3"></span></div>
+      <div class="stat"><b>DE</b><span data-i18n="s4"></span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="cats" aria-label="Kategorien"><div class="wrap" id="nav"></div></nav>
+
+<main class="wrap">
+  <div id="groups"></div>
+
+  <section class="group" id="compat">
+    <div class="ghead"><h2 data-i18n="compatH"></h2><p data-i18n="compatP"></p></div>
+    <div class="specs">
+      <table>
+        <thead><tr><th data-i18n="tComp"></th><th data-i18n="tVer"></th><th data-i18n="tNeed"></th><th data-i18n="tUse"></th></tr></thead>
+        <tbody id="spec-rows"></tbody>
+      </table>
+    </div>
+    <div class="notes">
+      <div class="card"><h3 data-i18n="n1h"></h3><p data-i18n="n1p"></p></div>
+      <div class="card"><h3 data-i18n="n2h"></h3><p data-i18n="n2p"></p></div>
+      <div class="card"><h3 data-i18n="n3h"></h3><p data-i18n="n3p"></p></div>
+    </div>
+  </section>
+
+  <section class="group" id="included">
+    <div class="ghead"><h2 data-i18n="incH"></h2></div>
+    <div class="grid">
+      <div class="card"><h3 data-i18n="inc1h"></h3><ul id="inc1"></ul></div>
+      <div class="card"><h3 data-i18n="inc2h"></h3><ul id="inc2"></ul></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap" data-i18n="foot"></div></footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var T = {
+    de: {
+      tag: 'Kompletter Server-Kern · ESX Legacy',
+      h1: 'Ein Server.<br>Ein <em>Rechtesystem</em>.<br>Ein Design.',
+      lead: 'Ruga Core ist das komplette Fundament eines deutschen Roleplay-Servers: Team- und Rechtesystem mit Discord-Anbindung, Admin-Menü mit Live-Karte, Fraktionen mit Gangwar, Wirtschaft, Fahrzeuge, Casino, Handy und eine durchgehend einheitliche Oberfläche in Rot und Schwarz.',
+      s1: 'Ressourcen in einem Ordner', s2: 'zentrales Rechtesystem für alle Scripte', s3: 'Legacy 1.13, Lua 5.4', s4: 'Oberflächen komplett auf Deutsch',
+      compatH: 'Kompatibilität & Voraussetzungen', compatP: 'Getestet auf dem Ruga-Server mit diesen Versionen. Alles startet mit einer Zeile: ensure [ruga_core].',
+      tComp: 'Komponente', tVer: 'Getestet mit', tNeed: 'Pflicht?', tUse: 'Wofür',
+      req: 'Pflicht', opt: 'Optional',
+      n1h: 'Installation', n1p: 'Ordner [ruga_core] in resources legen, ensure [ruga_core] in die server.cfg. Datenbanktabellen und Items legen die Scripte beim ersten Start selbst an.',
+      n2h: 'Rechte & Rollen', n2p: 'Alle Teamrechte stehen in einer Datei (permissions.lua) und kommen aus den Discord-Rollen. Jede Aktion prüft der Server noch einmal, der Client entscheidet nur, was angezeigt wird.',
+      n3h: 'Performance', n3p: 'Schleifen schlafen, wenn nichts passiert, Oberflächen hören auf Änderungen statt ständig abzufragen, und die Live-Karte sendet nur, wenn sie jemand offen hat.',
+      incH: 'Lieferumfang',
+      inc1h: 'Im Paket enthalten', inc2h: 'Nicht enthalten (separat installieren)',
+      inc1: ['Alle Ressourcen aus dem Ordner [ruga_core] mit Quellcode und config.lua', 'Ruga-Logo, Banner, Item- und Fahrzeugbilder der Scripte', 'Konfiguration auf Deutsch kommentiert, READMEs zu den großen Systemen', 'Live-Karte (GTA-Atlas) für das Admin-Menü'],
+      inc2: ['ESX Legacy, oxmysql, pma-voice, bob74_ipl, skinchanger/esx_skin, esx_notify', 'lb-upload (Loaf Scripts, kostenlos) für Fotos/Videos im Handy', 'Anticheat, Kleidungs-Packs, MLOs und Fahrzeug-Packs', 'Der Discord-Bot (Node.js) für Discord-Sync, Tickets und Willkommens-DM'],
+      foot: 'Ruga Core · Ruga Roleplay · Alle Angaben beziehen sich auf den getesteten Stand. Texte im Spiel sind Deutsch.'
+    },
+    en: {
+      tag: 'Complete server core · ESX Legacy',
+      h1: 'One server.<br>One <em>permission system</em>.<br>One design.',
+      lead: 'Ruga Core is the full foundation of a German roleplay server: staff and permission system with Discord sync, an admin menu with a live map, factions with gang wars, economy, vehicles, a casino, a phone and one consistent red-and-black interface everywhere.',
+      s1: 'resources in one folder', s2: 'central permission system for every script', s3: 'Legacy 1.13, Lua 5.4', s4: 'all in-game interfaces in German',
+      compatH: 'Compatibility & requirements', compatP: 'Tested on the Ruga server with these versions. Everything starts with one line: ensure [ruga_core].',
+      tComp: 'Component', tVer: 'Tested with', tNeed: 'Required?', tUse: 'Used for',
+      req: 'Required', opt: 'Optional',
+      n1h: 'Installation', n1p: 'Drop the [ruga_core] folder into resources and add ensure [ruga_core] to server.cfg. The scripts create their own database tables and items on first start.',
+      n2h: 'Permissions & roles', n2p: 'All staff rights live in one file (permissions.lua) and come from Discord roles. The server re-checks every action; the client only decides what to show.',
+      n3h: 'Performance', n3p: 'Loops sleep while nothing happens, interfaces react to changes instead of polling, and the live map only sends data while someone has it open.',
+      incH: 'What you get',
+      inc1h: 'Included', inc2h: 'Not included (install separately)',
+      inc1: ['Every resource in the [ruga_core] folder with source code and config.lua', 'Ruga logo, banners, item and vehicle images used by the scripts', 'Config files commented in German, READMEs for the large systems', 'Live map (GTA atlas) for the admin menu'],
+      inc2: ['ESX Legacy, oxmysql, pma-voice, bob74_ipl, skinchanger/esx_skin, esx_notify', 'lb-upload (Loaf Scripts, free) for phone photos and videos', 'Anticheat, clothing packs, MLOs and vehicle packs', 'The Discord bot (Node.js) for Discord sync, tickets and welcome DMs'],
+      foot: 'Ruga Core · Ruga Roleplay · All details refer to the tested version. In-game texts are German.'
+    }
+  };
+
+  // Gruppen und Ressourcen. de/en = kurze Beschreibung, li = Stichpunkte (optional), feature = breite Karte.
+  var G = [
+    { id: 'core', de: ['Kern & Team', 'Das Rückgrat: Rechte, Logs, Discord und alles, was das Team zum Moderieren braucht.'],
+      en: ['Core & staff', 'The backbone: permissions, logs, Discord and everything staff need to run the server.'],
+      items: [
+        { n: 'Ruga Core', r: 'ruga_core', feature: true,
+          de: 'Zentrales Team- und Rechtesystem. Über 20 Teamränge vom Probe-Supporter bis zum Inhaber, jede Aktion mit eigener Berechtigung.',
+          en: 'Central staff and permission system. 20+ staff ranks from trial supporter to owner, every action with its own permission.',
+          lide: ['Ränge kommen automatisch aus den Discord-Rollen', 'Logs in die Datenbank und pro Kategorie in einen eigenen Discord-Webhook', 'Strafen, Dienst-Status und Gruppen-Vergabe', 'Exporte für alle anderen Scripte (Can, HasRole, Log)'],
+          lien: ['Ranks sync automatically from Discord roles', 'Logs to the database and per category to its own Discord webhook', 'Punishments, duty state and group assignment', 'Exports used by every other script (Can, HasRole, Log)'] },
+        { n: 'Admin-Menü', r: 'r9_Admin_Menu', feature: true,
+          de: 'Das Werkzeug für das Team (F4), mit Seitenleiste und Rechten pro Knopf.',
+          en: 'The staff tool (F4), with a sidebar and permissions per button.',
+          lide: ['Live-Karte aller Spieler mit Pins, Filtern und Aktionen pro Pin', 'Zuschauen-Cockpit: Ego-/Verfolger-/Freie Kamera, Live-Werte, 60-Sekunden-Zeitleiste (Speed, Teleport, Treffer, Fahrzeug-Spawn)', '/admin-Meldungen mit Annehmen-Taste, Erinnerung nach einer Minute und /erledigt', 'Admin-Duty mit Outfit pro Rang, Noclip, Goto/Bring, Revive, Kick, Bann mit Ban-ID, Einfrieren, Team-Nachricht', 'Coinshop-Verwaltung inklusive Key-Generator (XXXX-XXXX-XXXX-XXXX)'],
+          lien: ['Live map of all players with pins, filters and actions per pin', 'Spectate cockpit: first-person, follow and free camera, live stats, 60-second timeline (speed, teleports, hits, vehicle spawns)', '/admin reports with an accept key, a reminder after one minute and /erledigt', 'Admin duty with an outfit per rank, noclip, goto/bring, revive, kick, ban with ban ID, freeze, staff message', 'Coin shop management including a key generator (XXXX-XXXX-XXXX-XXXX)'] },
+        { n: 'Admin-Jail', r: 'r9_adminjail', de: 'Spieler für eine Zeit ins Admin-Gefängnis setzen, mit eigener Oberfläche.', en: 'Send players to admin jail for a set time, with its own interface.' },
+        { n: 'Discord-Sync', r: 'ruga_discordsync', de: 'Sichere Verbindung zum Discord-Bot: Teamaktionen aus Discord, Teamchat-Brücke, Dienstzeiten.', en: 'Secure link to the Discord bot: staff actions from Discord, team chat bridge, duty time tracking.' },
+        { n: 'Teamchat', r: 'ruga_teamchat', de: '/tc für Teammitglieder, kommt als Karte rechts am Bildschirm.', en: '/tc for staff only, shown as a card on the right of the screen.' },
+        { n: 'Ankündigungen', r: 'ruga_announce', de: 'Server-Ankündigungen als Banner oben mittig mit Namen und Rang, mit Ton.', en: 'Server announcements as a banner at the top with name and rank, with sound.' },
+        { n: 'Einreise', r: 'ruga_einreise', de: 'Neue Spieler warten am Flughafen, bis das Team sie einreist. Mit Anleitung und Staff-Outfit.', en: 'New players wait at the airport until staff let them in. With a guide and a staff outfit.' },
+        { n: 'RI9ON API', r: 'ri9on_api', de: 'Prüft beim Verbinden, ob der FiveM-Name zu Charakter und Fraktion passt. Neuling-Schutz und Staff-Übersicht.', en: 'Checks on connect that the FiveM name matches the character and faction. New-player protection and staff overview.' },
+        { n: 'Creator-Panel', r: 'ruga_creatorpanel', de: 'Für Content Creator: Livestream-Key, Noclip, Nametags (F7).', en: 'For content creators: livestream key, noclip, nametags (F7).' },
+        { n: 'Gewinnspiele', r: 'ruga_giveaway', de: 'Gewinnspiele mit Teilnahmegebühr und automatischer Preisvergabe.', en: 'Giveaways with an entry fee and automatic prize payout.' },
+        { n: 'Daten-Pflege', r: 'ruga_dataclear', de: 'Inaktive zurücksetzen, Charakter-Reset und Namensänderung.', en: 'Reset inactive players, character resets and name changes.' },
+        { n: 'Item-Manager', r: 'r9_weapons_manager', de: 'Jedes ESX-Item an Spieler geben, über die Rechte von Ruga Core.', en: 'Give any ESX item to players, gated by Ruga Core permissions.' },
+        { n: 'Coins-Vergabe', r: 'r9_coins_giver', de: 'Ruga Coins per Spieler-ID vergeben.', en: 'Hand out Ruga Coins by player ID.' },
+        { n: 'Inhaber-Werkzeuge', r: 'ruga_inhaber', de: 'Testwerkzeuge nur für den Inhaber.', en: 'Test tools for the owner only.' },
+        { n: 'Kleidungs-Scan', r: 'ruga_clothscan', de: 'Zeigt, welche Kleidung aus Addon-Packs kommt und unter welcher Nummer sie im Laden steht.', en: 'Shows which clothing comes from addon packs and its number in the shop.' },
+        { n: 'Leave-Marker', r: 'ruga_leavemarker', de: 'Markierung mit Name und Grund, wo ein Spieler das Spiel verlassen hat.', en: 'Marker with name and reason where a player disconnected.' }
+      ] },
+    { id: 'ui', de: ['Oberfläche', 'Alles im gleichen Ruga-Look: Rot #E50004, Inter, dunkle Flächen.'],
+      en: ['Interface', 'Everything in the same Ruga look: red #E50004, Inter, dark panels.'],
+      items: [
+        { n: 'HUD', r: 'r9_hud_v2', de: 'Geld, Bank, Job, Hunger/Durst, Sprechreichweite, Mikro-Status, Spieler online, Tacho mit Tank und Gang.', en: 'Cash, bank, job, hunger/thirst, voice range, mic state, players online, speedometer with fuel and gear.' },
+        { n: 'Pausenmenü', r: 'ruga_pausemenu', de: 'Eigenes ESC-Menü: Karte, Einstellungen, tägliche Belohnung, Visum, Scoreboard, Neuigkeiten.', en: 'Custom ESC menu: map, settings, daily reward, visa, scoreboard, news.' },
+        { n: 'Personalmenü', r: 'ruga_personalmenu', de: 'Spielerprofil mit Visum, Fraktion, Spielzeit und Team-Rechten.', en: 'Player profile with visa, faction, playtime and staff rights.' },
+        { n: 'X-Menü & Emotes', r: 'ruga_xmenu', de: 'Aktionsrad (X) und Emote-Liste.', en: 'Action wheel (X) and emote list.' },
+        { n: 'Quickmenü', r: 'ruga_quickmenu', de: 'Emotes (F3) und Kleidung einzeln ablegen (J), mit Pfeiltasten, ohne Mauszeiger.', en: 'Emotes (F3) and taking off clothing piece by piece (J), arrow keys, no cursor.' },
+        { n: 'Herausforderungen', r: 'ruga_challenges', de: 'Tägliche und wöchentliche Aufgaben plus Meilensteine.', en: 'Daily and weekly tasks plus milestones.' },
+        { n: 'Kompass', r: 'ruga_compass', de: 'Himmelsrichtung oben mittig, blendet sich bei Bannern aus.', en: 'Compass heading at the top, hides itself under banners.' },
+        { n: 'Chat', r: 'ruga_chat', de: 'Chat im Ruga-Design.', en: 'Chat in the Ruga design.' },
+        { n: 'Theme', r: 'ruga_theme', de: 'Färbt GTAs eigenes Pausenmenü und Waffenrad in Ruga-Rot.', en: 'Recolours GTA\'s own pause menu and weapon wheel in Ruga red.' },
+        { n: 'Ladebildschirm', r: 'r9_loadingscreen', de: 'Ladebildschirm im Ruga-Stil.', en: 'Loading screen in the Ruga style.' },
+        { n: 'FPS-Menü', r: 'ruga_fps', de: 'Optimierungen pro Spieler, nur clientseitig, ohne Qualitätsverlust bei Texturen.', en: 'Per-player optimisations, client only, no texture quality loss.' }
+      ] },
+    { id: 'eco', de: ['Wirtschaft', 'Geld verdienen, ausgeben und sparen, mit Limits gegen Missbrauch.'],
+      en: ['Economy', 'Earning, spending and saving money, with limits against abuse.'],
+      items: [
+        { n: 'Banking', r: 'ruga_banking', de: 'Ein- und Auszahlen, Überweisung per Ingame-ID, rollende 24-Stunden-Limits, Kredite nach Fraktionsrang.', en: 'Deposits, withdrawals, transfers by in-game ID, rolling 24-hour limits, loans by faction rank.' },
+        { n: 'Inventar', r: 'ruga_inventory', de: 'Eigenes Inventar: geben, wegwerfen, benutzen, Kofferraum, Bilder pro Item.', en: 'Custom inventory: give, drop, use, vehicle trunks, an image per item.' },
+        { n: 'Ruga Coins', r: 'ruga_coins', de: 'Zentrale Premium-Währung für Shop, Case und Startpaket.', en: 'Central premium currency for shop, case and starter pack.' },
+        { n: 'Coinshop', r: 'ruga_coinshop', feature: true, de: 'Store für Ruga Coins mit Kategorien, Bestand, Creator-Codes mit Anteil und Einlöse-Codes.', en: 'Store for Ruga Coins with categories, stock, creator codes with revenue share and redeem codes.',
+          lide: ['Items und Fahrzeuge direkt in Inventar bzw. Garage', 'Creator-Codes: Anteil wird automatisch gutgeschrieben, auch offline', 'Einmal-Keys im Format XXXX-XXXX-XXXX-XXXX für Tebex-Verkäufe'],
+          lien: ['Items and vehicles go straight into inventory or garage', 'Creator codes: share is credited automatically, even offline', 'One-time keys in XXXX-XXXX-XXXX-XXXX format for Tebex sales'] },
+        { n: 'Case', r: 'ruga_case', de: 'Öffenbares Case im CS:GO-Stil, Gewinn wird auf dem Server ausgelost.', en: 'CS:GO-style case, the prize is rolled on the server.' },
+        { n: 'Startpaket', r: 'ruga_startpaket', de: 'Einmaliges Startpaket per /ruga: Auto, Case, Bargeld, Coins.', en: 'One-time starter pack via /ruga: car, case, cash, coins.' },
+        { n: '24/7 Shop', r: 'ruga_shop', de: 'Läden zum Kaufen von Items.', en: 'Stores to buy items.' },
+        { n: 'Lohn', r: 'ruga_paycheck', de: 'Sozialhilfe für Arbeitslose, Fraktionslohn nach Rang.', en: 'Benefits for the unemployed, faction pay by rank.' },
+        { n: 'Lagerräume', r: 'ruga_lager', de: 'Kaufbare Lager mit ID und Passwort.', en: 'Buyable storage units with ID and password.' },
+        { n: 'Farm-Routen', r: 'ruga_routes', de: 'Farmen, verarbeiten, herstellen: Magazine, Waffen, Schalldämpfer.', en: 'Farm, process, craft: magazines, weapons, suppressors.' },
+        { n: 'Angeln', r: 'ruga_fishing', de: 'Angelplätze und Fischhändler, ingame gesetzt, mit seltenen Fängen.', en: 'Fishing spots and fish buyer, placed in-game, with rare catches.' },
+        { n: 'LifeInvader', r: 'ruga_lifeinvader', de: 'Serverweite Nachrichten, öffentlich oder anonym, Preis pro Zeichen.', en: 'Server-wide messages, public or anonymous, priced per character.' }
+      ] },
+    { id: 'veh', de: ['Fahrzeuge', 'Vom Autohaus bis zum illegalen Tuner.'], en: ['Vehicles', 'From the dealership to the illegal tuner.'],
+      items: [
+        { n: 'Garage', r: 'ruga_garage', de: 'Garagen überall, Fahrzeuge in jeder Garage verfügbar, Spitznamen, Favoriten, Kofferraum-Gewicht.', en: 'Garages everywhere, vehicles available at every garage, nicknames, favourites, trunk weight.' },
+        { n: 'Autohändler', r: 'ruga_dealership', de: 'Fahrzeuge kaufen und wieder verkaufen.', en: 'Buy and sell back vehicles.' },
+        { n: 'Autovermietung', r: 'ruga_rental', de: 'Fahrzeuge stundenweise mieten.', en: 'Rent vehicles by the hour.' },
+        { n: 'Mechaniker', r: 'ruga_mechanic', de: 'Werkstatt-Menü im Stil von Los Santos Customs.', en: 'Workshop menu in the style of Los Santos Customs.' },
+        { n: 'Illegaler Tuner', r: 'ruga_tuner', de: 'Renn-Getriebe, Renn-Motor-Sound, Renn-Reifen, nur für den Tuner-Job.', en: 'Race gearbox, race engine sound, race tyres, tuner job only.' },
+        { n: 'Carclear', r: 'ruga_carclear', de: 'Parkt ungenutzte Fahrzeuge nach Zeitplan mit Countdown zurück in die Garage.', en: 'Parks unused vehicles back into the garage on a schedule with a countdown.' },
+        { n: 'Autoradio', r: 'ruga_carradio', de: 'Radio im Auto mit Stream-URL, hörbar im Umkreis.', en: 'In-car radio with stream URL, audible nearby.' }
+      ] },
+    { id: 'frak', de: ['Fraktionen & Jobs', 'Fraktionen anlegen, verwalten und gegeneinander antreten lassen.'], en: ['Factions & jobs', 'Create, manage and pit factions against each other.'],
+      items: [
+        { n: 'Frakcreator & Gangwar', r: 'ruga_frakcreator', feature: true,
+          de: 'Fraktionen per Job-Creator anlegen: Ränge mit Rechten, Visum-Stufe, Sperre, Lager, Garage, Kasse, Mitglieder-Suche, Türen.',
+          en: 'Create factions with the job creator: ranks with rights, visa level, lock, storage, garage, treasury, member search, doors.',
+          lide: ['Gangwar mit Herausforderung, Vorbereitung und Runden in eigener Dimension', 'Modi: Masse VS Masse, Streetfight (1 gegen 1), Anwesend (Angriff mit BF400, jede Runde Seitentausch), Air Fight', 'Kronen pro Sieg, Kronen-Shop und monatlicher Gangwar-Pass mit 20 Stufen', 'Ranglisten, Verlauf und Zuschauen nach dem Tod'],
+          lien: ['Gang wars with challenge, preparation and rounds in their own dimension', 'Modes: Masse VS Masse, Streetfight (1 vs 1), Anwesend (BF400 attack, sides swap every round), Air Fight', 'Crowns per win, crown shop and a monthly 20-level gang war pass', 'Rankings, history and spectating after death'] },
+        { n: 'LSPD', r: 'ruga_lspd', de: 'MDT-Tablet, Waffenkammer, Spinde, Gefängnis, Panikknopf, Ladenraub.', en: 'MDT tablet, armoury, lockers, prison, panic button, store robberies.' },
+        { n: 'LSMD', r: 'ruga_lsmd', de: 'Rettungsdienst: Menü, Dienst, Wiederbeleben, Notrufe.', en: 'Medical service: menu, duty, revives, emergency calls.' },
+        { n: 'Aktionen', r: 'ruga_actionmenu', de: 'Fesseln, Festnehmen, Geisel nehmen, ins und aus dem Auto setzen, vom Server geprüft.', en: 'Cuff, detain, take hostage, put in and out of vehicles, all checked by the server.' },
+        { n: 'Lizenzen', r: 'ruga_licenses', de: 'Ausweis, Fahrschule mit Theorie und Praxis, Schießstand für den Waffenschein.', en: 'ID card, driving school with theory and practice, shooting range for the gun licence.' },
+        { n: 'Türschlösser', r: 'ruga_doorlock', de: 'Türen, die nur bestimmte Jobs und Ränge abschließen, im Job-Creator gesetzt.', en: 'Doors only certain jobs and ranks can lock, placed in the job creator.' },
+        { n: 'Funk', r: 'funk', de: 'Funkgerät mit eigener Oberfläche.', en: 'Radio device with its own interface.' }
+      ] },
+    { id: 'pvp', de: ['PvP & Freizeit', 'Kämpfen, spielen und sicher sein.'], en: ['PvP & leisure', 'Fight, play and stay safe.'],
+      items: [
+        { n: 'Diamond Casino', r: 'ruga_casino', feature: true,
+          de: 'Das Casino wie in GTA Online, alles auf dem Server ausgelost.',
+          en: 'The casino as in GTA Online, every draw happens on the server.',
+          lide: ['Blackjack, Roulette, Three Card Poker, 8 Slot-Automaten, Glücksrad', 'Chips an der Kasse, Tageslimits für Gewinn und Verlust', 'VIP über Discord-Rolle: höhere Einsätze, mehr Chips, zwei Glücksrad-Drehungen'],
+          lien: ['Blackjack, roulette, Three Card Poker, 8 slot machines, lucky wheel', 'Chips at the cashier, daily win and loss limits', 'VIP via Discord role: higher bets, more chips, two wheel spins'] },
+        { n: 'FFA', r: 'ruga_ffa', de: 'Free-for-all-Zonen, eigene Lobbys, Rangliste und Killcam.', en: 'Free-for-all zones, custom lobbies, ranking and kill cam.' },
+        { n: 'Deathscreen', r: 'ruga_deathscreen', de: 'Bewusstlos statt tot, K.O. bei Fäusten, Freecam, Body-Sync mit Cooldown, Respawn-Strafe.', en: 'Unconscious instead of dead, knockouts for fists, freecam, body sync with cooldown, respawn penalty.' },
+        { n: 'Revive-Stationen', r: 'ruga_revive', de: 'Bewusstlose im Umkreis gegen Gebühr wiederbeleben.', en: 'Revive unconscious players nearby for a fee.' },
+        { n: 'Safezones', r: 'ruga_safezone', de: 'Tempolimit, keine Waffen, Schutz. Fesseln und Tragen nur für die Polizei, PD darf im eigenen Revier Waffen ziehen.', en: 'Speed limit, no weapons, protection. Cuffing and carrying police only, PD may draw weapons at its station.' }
+      ] },
+    { id: 'char', de: ['Charakter & Handy', 'Aussehen, Kleidung und Kommunikation.'], en: ['Character & phone', 'Looks, clothing and communication.'],
+      items: [
+        { n: 'Handy', r: 'ruga_phone', feature: true,
+          de: 'Handy im iOS-Stil, jedes Handy ist ein eigenes Item.',
+          en: 'iOS-style phone, every phone is its own item.',
+          lide: ['Anrufe und Videoanrufe über pma-voice', 'Nachrichten, Kamera, Videoaufnahme, InstaPic Live, AirShare', 'Eigene Apps können eingebunden werden'],
+          lien: ['Calls and video calls through pma-voice', 'Messages, camera, video recording, InstaPic Live, AirShare', 'Supports custom apps'] },
+        { n: 'Kleidungsgeschäft', r: 'ruga_clothing', de: 'Kleidung ändern, Outfits speichern und per Code mit Freunden teilen, Favoriten.', en: 'Change clothes, save outfits and share them with a code, favourites.' },
+        { n: 'Friseur', r: 'ruga_barber', de: 'Haare, Bart, Augenbrauen, Make-up.', en: 'Hair, beard, eyebrows, make-up.' }
+      ] },
+    { id: 'base', de: ['Gameplay-Grundlagen', 'Kleine Scripte, die überall gebraucht werden.'], en: ['Gameplay basics', 'Small scripts needed everywhere.'],
+      items: [
+        { n: 'Tragen', r: 'carry', de: 'Spieler tragen, mit Cooldown, Schutz für Admins im Dienst und Safezone-Regeln.', en: 'Carry players, with cooldown, protection for on-duty staff and safezone rules.' },
+        { n: 'Ducken', r: 'crouch', de: 'Ducken auf Tastendruck mit Cooldown.', en: 'Crouch on keypress with cooldown.' },
+        { n: 'Hände hoch', r: 'handsup', de: 'Hände hoch auf Tastendruck.', en: 'Hands up on keypress.' },
+        { n: 'Kein Deckungssystem', r: 'ruga_nocover', de: 'Schaltet das Deckungssystem (Q) ab.', en: 'Disables the cover system (Q).' },
+        { n: 'NPC-Stopper', r: 'R9_npc_stoper', de: 'Keine NPCs und kein Verkehr.', en: 'No NPC peds or traffic.' },
+        { n: 'Serverzeit', r: 'ruga_time', de: 'Eine gemeinsame Uhrzeit für alle (Europe/Berlin).', en: 'One shared clock for everyone (Europe/Berlin).' },
+        { n: 'Sync', r: 'ruga_sync', de: 'Wetter- und Zeit-Synchronisation.', en: 'Weather and time sync.' }
+      ] }
+  ];
+
+  var SPECS = [
+    ['FiveM Server (OneSync)', 'Artifacts 2026', 'req', { de: 'Server, OneSync für Positionen, Gangwar und Live-Karte', en: 'Server, OneSync for positions, gang wars and live map' }],
+    ['ESX Legacy (es_extended)', '1.13.5', 'req', { de: 'Framework für fast alle Scripte', en: 'Framework for almost every script' }],
+    ['oxmysql', '2.14.1', 'req', { de: 'Datenbank (MySQL/MariaDB)', en: 'Database (MySQL/MariaDB)' }],
+    ['esx_notify', 'ESX Legacy', 'req', { de: 'Benachrichtigungen, Teamchat- und Meldungskarten', en: 'Notifications, team chat and report cards' }],
+    ['skinchanger + esx_skin', 'ESX Legacy', 'req', { de: 'Kleidungsladen, Friseur, Einreise', en: 'Clothing shop, barber, arrival' }],
+    ['pma-voice', '7.0.1', 'req', { de: 'Sprechreichweite im HUD, Handy-Anrufe, Funk', en: 'Voice range in the HUD, phone calls, radio' }],
+    ['bob74_ipl', '2.6.0', 'opt', { de: 'Nur für das Casino (Innenraum)', en: 'Casino interior only' }],
+    ['esx_animations', 'ESX Legacy', 'opt', { de: 'Emote-Liste im Quickmenü', en: 'Emote list in the quick menu' }],
+    ['lb-upload', 'Loaf Scripts (kostenlos)', 'opt', { de: 'Fotos, Videos und Sprachnachrichten im Handy', en: 'Photos, videos and voice memos in the phone' }],
+    ['Discord-Bot (Node.js 18+, discord.js 14)', '14.26', 'opt', { de: 'Rollen-Sync, Discord-Befehle, Teamchat-Brücke', en: 'Role sync, Discord commands, team chat bridge' }]
+  ];
+
+  var lang = 'de';
+  try { var s = localStorage.getItem('ruga-core-lang'); if (s === 'en' || s === 'de') lang = s; } catch (e) {}
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function render() {
+    var t = T[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t[el.getAttribute('data-i18n')] || ''; });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) { el.innerHTML = t[el.getAttribute('data-i18n-html')] || ''; });
+    ['de', 'en'].forEach(function (l) { document.getElementById('btn-' + l).setAttribute('aria-pressed', l === lang ? 'true' : 'false'); });
+
+    var count = 0, nav = '', html = '';
+    G.forEach(function (g) {
+      var head = g[lang];
+      nav += '<a href="#' + g.id + '">' + esc(head[0]) + '</a>';
+      html += '<section class="group" id="' + g.id + '"><div class="ghead"><h2>' + esc(head[0]) + '</h2><p>' + esc(head[1]) + '</p></div><div class="grid">';
+      g.items.forEach(function (it) {
+        count++;
+        var li = lang === 'de' ? it.lide : it.lien;
+        html += '<article class="card' + (it.feature ? ' feature' : '') + '"><h3>' + esc(it.n) + ' <code>' + esc(it.r) + '</code></h3><p>' + esc(it[lang]) + '</p>' +
+          (li ? '<ul>' + li.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') + '</article>';
+      });
+      html += '</div></section>';
+    });
+    nav += '<a href="#compat">' + esc(t.compatH.split(' & ')[0]) + '</a><a href="#included">' + esc(t.incH) + '</a>';
+    document.getElementById('nav').innerHTML = nav;
+    document.getElementById('groups').innerHTML = html;
+    document.getElementById('n-res').textContent = String(count);
+
+    document.getElementById('spec-rows').innerHTML = SPECS.map(function (r) {
+      return '<tr><td><code>' + esc(r[0]) + '</code></td><td>' + esc(r[1]) + '</td><td class="' + r[2] + '">' + esc(r[2] === 'req' ? t.req : t.opt) + '</td><td>' + esc(r[3][lang]) + '</td></tr>';
+    }).join('');
+    document.getElementById('inc1').innerHTML = t.inc1.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
+    document.getElementById('inc2').innerHTML = t.inc2.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
+  }
+
+  document.querySelectorAll('.lang button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      lang = b.getAttribute('data-lang');
+      try { localStorage.setItem('ruga-core-lang', lang); } catch (e) {}
+      render();
+    });
+  });
+  render();
+})();
+</script>
+
+</body></html>
